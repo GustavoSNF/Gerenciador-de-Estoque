@@ -134,8 +134,9 @@ class Estoque {
 
     // Adiciona produtos ao estoque
     estoque.adicionarProduto('Cerveja', 'Gelato', 100);
-    estoque.adicionarProduto('Cerveja', 'Gelato', 150);
+    estoque.adicionarProduto('Cerveja', 'Bhrama', 150);
     estoque.adicionarProduto('Cerveja', 'Heineken', 200);
+    estoque.adicionarProduto('Cerveja', 'Skol', 200);
 
     // Salva os novos dados no arquivo
     await estoque.salvarEstoque();
