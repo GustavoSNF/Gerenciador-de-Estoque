@@ -2,27 +2,63 @@ import { Produto } from "./Produto.js";
 import fs from "fs/promises";
 
 class Estoque {
-    constructor(){
-        this.estoque = [];
+    constructor(arquivo){
+        this.arquivo = arquivo
+        this.listArquivo = []
     }
 
-    adicionarProduto(nome, marca, qtdDisponivel){
-        const novoProduto = new Produto(this.validarId(), nome, marca, qtdDisponivel)
-
+    async carregarEstoque(){
         try{
-            const produtoDuplicado = this.estoque.find(produto => produto.nome === nome && produto.marca === marca)
-
-            if(produtoDuplicado){
-                throw new Error('ERRO - Produto duplicado!')
-            }
-            
-            this.estoque.push(novoProduto)
-            return novoProduto
+            const dados = await fs.readFile(this.arquivo, 'utf-8');
+            return this.listArquivo = JSON.parse(dados)
 
         }catch(erro){
-            return erro.message
+            if(erro.code === 'ENOENT'){
+                return this.listArquivo = []
+            } else{
+                console.log(erro)
+                return erro
+            }
+            
         }
-        
+    }
+
+    async salvarDados(){
+        try{
+            await fs.writeFile(this.arquivo, JSON.stringify(this.listArquivo))
+            console.log('Arquivo salvo!')
+        }catch(erro){
+            console.log(erro)
+            return erro
+        }
+    }
+
+    async listarProdutos(){
+        const conteudo = this.listArquivo
+        return conteudo
+    }
+
+    async adicionarProduto(nome, marca, qtdDisponivel){
+
+        try{
+            
+            const novoProduto = new Produto(await this.validarId(), nome, marca, qtdDisponivel)
+
+            const listaProdutosEmMemoria = await this.listarProdutos()
+
+            const produtoDuplicado = listaProdutosEmMemoria.find(produto => produto.nome === novoProduto.nome && produto.marca === novoProduto.marca)
+            
+            if(produtoDuplicado){
+                throw new Error('Produto duplicado!')
+            } else{
+                this.listArquivo.push(novoProduto)
+                console.log('Produto adicionado!')
+            }
+
+        }catch(erro){
+            console.log(erro)
+            return erro
+        }
     }
 
     gerarId(){
@@ -37,110 +73,66 @@ class Estoque {
         
         return id
     }
-    
-    validarId(){
-    
-        let loop = true
+
+    async validarId(){
+        
+        let loop = true;
     
         do{
-            const idProduto = this.gerarId()
+            const idGerado = this.gerarId()
 
-            const idDuplicado = this.estoque.find(produto => produto.id === idProduto)
+            const listaProdutosEmMemoria = await this.listarProdutos()
+
+            const idDuplicado = listaProdutosEmMemoria.find(produto => produto.id === idGerado)
 
             if(!idDuplicado){
                 loop = false
-                return idProduto
-            }
-
-        }while(loop)
-    }
-
-    deletarProduto(nome, marca){
-
-        try{
-            const produtoEncontrado = this.estoque.findIndex((produto) => {
-                if(produto.nome === nome && produto.marca === marca){
-                    return produto
-                }
-            })
-
-            if(produtoEncontrado === -1){
-                throw new Error('Produto não encontrado - Deleção cancelada')
-            }
-
-            this.estoque.splice(produtoEncontrado, 1)
-            return `Produto deletado!`
-
-        }catch(erro){
-            return erro.message
-        }
-    }
-
-    listarProdutos(){
-        return this.estoque
-    }
-
-    atualizarQtdDisponivel(nome, marca, qtdNova){
-
-        try{
-            const produtoEncontrado = this.estoque.find(produto => produto.nome === nome && produto.marca === marca)
-
-            if(!produtoEncontrado){
-                throw new Error('Produto não encontrado')
+                return idGerado
             }
     
-            produtoEncontrado.qtdDisponivel = qtdNova
-            return produtoEncontrado
+        }while(loop)
 
-        }catch(erro){
-            return erro.message
-        }
     }
 
-    async salvarEstoque(){
+    async deletarProduto(id){
         try{
-            await fs.writeFile('estoque.json', JSON.stringify(this.estoque)) 
-            console.log('Arquivo Salvo!')
+
+            const listaProdutosEmMemoria = await this.listarProdutos()
+
+            const produtoEncontrado = listaProdutosEmMemoria.findIndex(produto => produto.id === id)
+
+            if(produtoEncontrado === -1){
+                throw new Error('Produto não encontrado!')
+            }else{
+                listaProdutosEmMemoria.splice(produtoEncontrado, 1)
+                console.log('Produto Deletado!')
+            }
 
         }catch(erro){
+            console.log(erro)
             return erro
         }
-   
     }
 
-    async carregarEstoque() {
-        try {
-
-            const dados = await fs.readFile('estoque.json', 'utf-8');
-
-            const dadosFormatados = await JSON.parse(dados);
-
-            return dadosFormatados 
-
-        } catch (erro) {
-            console.error('Erro ao ler arquivo:', erro.message);
-            return [];
-        }
-    }
 
 }
 
 (async () => {
-    const estoque = new Estoque();
+    try{
+        const app = new Estoque('estoque.json')
+    
+        await app.carregarEstoque()
+    
+        await app.deletarProduto('8827900796467')
+        
+        console.log(await app.listarProdutos())
 
-    // Carrega os dados do arquivo
-    const dadosCarregados = await estoque.carregarEstoque();
-    console.log('Dados carregados:', dadosCarregados);
-
-    // Adiciona produtos ao estoque
-    estoque.adicionarProduto('Cerveja', 'Gelato', 100);
-    estoque.adicionarProduto('Cerveja', 'Bhrama', 150);
-    estoque.adicionarProduto('Cerveja', 'Heineken', 200);
-    estoque.adicionarProduto('Cerveja', 'Skol', 200);
-
-    // Salva os novos dados no arquivo
-    await estoque.salvarEstoque();
-})();
+        await app.salvarDados()
 
 
+    }catch(erro){
+        console.log(erro)
+        return erro
+    }
 
+})()
