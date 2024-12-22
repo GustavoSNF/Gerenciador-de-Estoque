@@ -1,5 +1,6 @@
 import { Produto } from "./Produto.js";
 import fs from "fs/promises";
+import { ManagerError } from "./Error.js";
 
 class Estoque {
     constructor(arquivo){
@@ -16,8 +17,7 @@ class Estoque {
             if(erro.code === 'ENOENT'){
                 return this.listArquivo = []
             } else{
-                console.log(erro)
-                return erro
+                ManagerError.exibirErro(erro)
             }
             
         }
@@ -28,8 +28,7 @@ class Estoque {
             await fs.writeFile(this.arquivo, JSON.stringify(this.listArquivo))
             console.log('Arquivo salvo!')
         }catch(erro){
-            console.log(erro)
-            return erro
+            ManagerError.exibirErro(erro)
         }
     }
 
@@ -49,15 +48,14 @@ class Estoque {
             const produtoDuplicado = listaProdutosEmMemoria.find(produto => produto.nome === novoProduto.nome && produto.marca === novoProduto.marca)
             
             if(produtoDuplicado){
-                throw new Error('Produto duplicado!')
+                ManagerError.criarErro('112', "Produto Duplicado")
             } else{
                 this.listArquivo.push(novoProduto)
                 console.log('Produto adicionado!')
             }
 
         }catch(erro){
-            console.log(erro)
-            return erro
+            ManagerError.exibirErro(erro)
         }
     }
 
@@ -102,15 +100,33 @@ class Estoque {
             const produtoEncontrado = listaProdutosEmMemoria.findIndex(produto => produto.id === id)
 
             if(produtoEncontrado === -1){
-                throw new Error('Produto não encontrado!')
+                ManagerError.criarErro('130', 'Produto não encontrado!')
             }else{
                 listaProdutosEmMemoria.splice(produtoEncontrado, 1)
                 console.log('Produto Deletado!')
             }
 
         }catch(erro){
-            console.log(erro)
-            return erro
+            ManagerError.exibirErro(erro)
+        }
+    }
+
+    async alterarQtdDisponível(id, qtdNova) {
+        try{
+            const listaProdutosEmMemoria = await this.listarProdutos()
+
+            const produtoEncontrado = listaProdutosEmMemoria.find(produto => produto.id === id)
+    
+            if(produtoEncontrado){
+                console.log('Quantidade alterada!')
+                produtoEncontrado.qtdDisponivel = qtdNova
+                return produtoEncontrado
+            } else{
+                ManagerError.criarErro('130', 'Produto não encontrado!')
+            }
+
+        }catch(erro){
+            ManagerError.exibirErro(erro)
         }
     }
 
@@ -122,17 +138,13 @@ class Estoque {
         const app = new Estoque('estoque.json')
     
         await app.carregarEstoque()
-    
-        await app.deletarProduto('8827900796467')
         
+        await app.adicionarProduto('Sabonete', 'skala', 120)
+
         console.log(await app.listarProdutos())
 
-        await app.salvarDados()
-
-
     }catch(erro){
-        console.log(erro)
-        return erro
+        ManagerError.exibirErro(erro)
     }
 
 })()
