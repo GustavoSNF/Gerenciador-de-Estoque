@@ -1,8 +1,8 @@
-import { Produto } from "./Produto.js";
+import { Produto } from "../models/Produto.js";
 import fs from "fs/promises";
-import { ManagerError } from "./Error.js";
+import { ManagerError } from "../Manager/ManagerError.js";
 
-class Estoque {
+export class Estoque {
     constructor(arquivo){
         this.arquivo = arquivo
         this.listArquivo = []
@@ -25,7 +25,7 @@ class Estoque {
 
     async salvarDados(){
         try{
-            await fs.writeFile(this.arquivo, JSON.stringify(this.listArquivo))
+            await fs.writeFile(this.arquivo, JSON.stringify(this.listArquivo, null, 2))
             console.log('Arquivo salvo!')
         }catch(erro){
             ManagerError.exibirErro(erro)
@@ -133,18 +133,6 @@ class Estoque {
 
 }
 
-(async () => {
-    try{
-        const app = new Estoque('estoque.json')
-    
-        await app.carregarEstoque()
-        
-        await app.adicionarProduto('Sabonete', 'skala', 120)
+export const app = new Estoque('src/data/estoque.json');
 
-        console.log(await app.listarProdutos())
 
-    }catch(erro){
-        ManagerError.exibirErro(erro)
-    }
-
-})()

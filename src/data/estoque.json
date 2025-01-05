@@ -1,0 +1,20 @@
+[
+  {
+    "id": "2473973683289",
+    "nome": "Sabonete",
+    "marca": "Pantene",
+    "qtdDisponivel": 20
+  },
+  {
+    "id": "2473973662933",
+    "nome": "Sabonete",
+    "marca": "Clear",
+    "qtdDisponivel": 20
+  },
+  {
+    "id": "5072444346616",
+    "nome": "Açúcar",
+    "marca": "União",
+    "qtdDisponivel": 20
+  }
+]
