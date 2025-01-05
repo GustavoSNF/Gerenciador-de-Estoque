@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1369380647747",
+    "nome": "Creme Capilar",
+    "marca": "Pantene",
+    "qtdDisponivel": 20
+  },
+  {
+    "id": "1369382390442",
+    "nome": "Creme Capilar",
+    "marca": "Skala",
+    "qtdDisponivel": 20
+  },
+  {
+    "id": "1369382424133",
+    "nome": "Creme Capilar",
+    "marca": "Polo",
+    "qtdDisponivel": 20
+  }
+]
